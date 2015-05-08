@@ -1,0 +1,116 @@
+
+  
+    <!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<meta name="robots" content="all">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	
+	<title>clipboard</title>
+
+</head>
+<body>
+	
+	<div class="container">
+	    <div contenteditable="true">
+		    <header>
+	            <hgroup>
+	                <h1>FIS源码-fis release</h1>
+	                <h2> FIS源码解析</h2>
+
+	            </hgroup>
+	            <nav>
+	                <ul>
+	                    <li><a href="#">test item #1</a></li>
+	                    <li><a href="#">test item #2</a></li>
+	                    <li><a href="#">test item #3</a></li>
+	                </ul>
+
+	            </nav>
+	        </header>
+
+        </div>
+        <button id="getsr">获取选中文字</button> <button id="setsr">设置选中</button>
+        <button id="bold">加粗</button> <button id="underline">下划线</button>
+	</div>
+	
+	<script>
+		var $;
+		(function(window, document){
+			// Super tiny selector engine
+			$ = function(selector,context){return(context||document).querySelectorAll(selector)};
+			var getSR = $("#getsr")[0],
+				setSR = $("#setsr")[0],
+				underline = $("#underline")[0],
+				bold = $("#bold")[0];
+			// Basic clipboard events
+			
+			// iOS5 Safari Doesn't seem to trigger the before events
+			document.addEventListener("beforecopy",  clipboard, false);
+			document.addEventListener("beforecut",   clipboard, false);
+			document.addEventListener("beforepaste", clipboard, false);
+			document.addEventListener("copy",  clipboard, false);
+			document.addEventListener("cut",   clipboard, false);
+			document.addEventListener("paste", clipboard, false);
+			function clipboard(e) {
+			    var range = window.getSelection();
+			    alert(e.type + ": " + range.toString());
+			    clipboadData(e);
+			}
+			// Selection ranges
+			getSR.addEventListener("click", ranges, false);
+			setSR.addEventListener("click", function(e) { ranges(e, { start: $("h1")[0].firstChild, startOffset: 5, end: $("p")[2].firstChild, endOffset: 50 }) }, false);
+			function ranges(e, opts) {
+				var sel = window.getSelection(),
+					range;
+				if(opts) {
+					// Set range
+					range = document.createRange();
+					
+					range.setStart(opts.start, opts.startOffset);
+					range.setEnd(opts.end, opts.endOffset);
+					sel.removeAllRanges();
+					sel.addRange(range);
+					console.log("The contents of the range just set: " + sel.toString());
+				} else {
+					// Get range
+					range = sel.toString();
+					if(range != "") {
+						alert(sel.toString());
+					} else {
+						alert("No range selection found");
+					}
+				}
+			}
+			// Setting clipboard data
+			//getCB.addEventListener("click", clipboadData, false);
+			//setCB.addEventListener("click", clipboadData, false);
+			function clipboadData(e) {
+				if("clipboardData" in e && e.type === "paste") {
+					// No clipboard data on event then don't proceed
+					alert("Clipboard data: " + e.clipboardData.getData('text/plain'));
+				} else if("clipboardData" in e && e.type === "copy") {
+					console.log("Setting clipboard data");
+					e.clipboardData.setData('text','blah blah, purple monkey dishwasher');
+				}
+			}
+			// This won't show the iOS highlight until you bring focus to the contenteditable element and don't dimiss the keyboard.
+			// Keeping focus and not dimissing the keyboard will then show the highlight when you refresh the page.
+			ranges("", { start: $("h1")[0].firstChild, startOffset: 5, end: $("h1")[0].firstChild, endOffset: 15 });
+			// WYSIWYG stuff
+			function cmd(cmd, ui, val) {
+				document.execCommand(cmd, ui, val);
+			}
+			bold.addEventListener("click",function(){ cmd("bold",false); },false);
+			underline.addEventListener("click",function(){ cmd("underline",false); },false);
+		})(this, document)
+	</script>
+	
+
+</body>
+</html>
+  
